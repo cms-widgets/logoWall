@@ -1,0 +1,12 @@
+<!--预览视图-->
+<div id="logoWall" class="pic-List container">
+    <div class="row" >
+        <div class="col-md-3 col-sm-6">
+            <a href="#" class="thumbnail"
+               th:each="logoLink : $[properties['logoLinkList']]"  th:href="${logoLink.linkUrl}">
+                <img th:src="${logoLink.thumbUri}" src="http://placehold.it/250x250" alt="...">
+            </a>
+        </div>
+    </div>
+</div>
+<!--/预览视图-->

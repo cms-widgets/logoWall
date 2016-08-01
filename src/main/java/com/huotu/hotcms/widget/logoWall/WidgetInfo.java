@@ -54,20 +54,15 @@ public class WidgetInfo implements Widget{
     @Override
     public String name(Locale locale) {
         if (locale.equals(Locale.CHINESE)) {
-            return "A custom Widget";
+            return "LOGO墙";
         }
         return "logoWall";
     }
 
     @Override
-    public String description() {
-        return "这是一个logo墙控件，你可以对组件进行自定义修改。";
-    }
-
-    @Override
     public String description(Locale locale) {
         if (locale.equals(Locale.CHINESE)) {
-            return description();
+            return "这是一个logo墙控件，你可以对组件进行自定义修改。";
         }
         return "This is a logoWall,  you can make custom change the component.";
     }

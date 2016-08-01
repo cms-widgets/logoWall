@@ -9,13 +9,12 @@
 
 package com.huotu.hotcms.widget.logoWall;
 
-import com.huotu.hotcms.service.entity.Link;
 import com.huotu.hotcms.widget.ComponentProperties;
 import com.huotu.hotcms.widget.Widget;
 import com.huotu.hotcms.widget.WidgetStyle;
 import com.huotu.widget.test.WidgetTest;
-import com.huotu.widget.test.WidgetTestConfig;
 import com.huotu.widget.test.bean.WidgetViewController;
+import org.apache.commons.collections.map.HashedMap;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +24,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 /**
  * @author CJ
@@ -38,14 +35,10 @@ public class TestWidgetInfo extends WidgetTest {
         return false;
     }
 
-    @Autowired
-    private WidgetViewController widgetViewController;
-
     @Override
     protected void editorWork(Widget widget, WebElement editor, Supplier<Map<String, Object>> currentWidgetProperties) {
         try{
             currentWidgetProperties.get();
-            assert false;
         }catch (IllegalStateException ignored){
             assertThat(0).as("save没有属性值返回异常").isEqualTo(0);
         }
@@ -54,7 +47,6 @@ public class TestWidgetInfo extends WidgetTest {
         assertThat(options.size()).isNotEqualTo(0);
         try{
             currentWidgetProperties.get();
-            assert false;
         }catch (IllegalStateException ignored){
             assertThat(0).as("save没有属性值返回异常").isEqualTo(0);
         }
@@ -63,37 +55,21 @@ public class TestWidgetInfo extends WidgetTest {
 
     @Override
     protected void browseWork(Widget widget, WidgetStyle style, Function<ComponentProperties, WebElement> uiChanger) {
-        uiChanger = (properties) -> {
-            widgetViewController.setCurrentProperties(properties);
-            String uri = "/browse/" + WidgetTestConfig.WidgetIdentity(widget) + "/" + style.id();
-            if (printPageSource())
-                try {
-                    mockMvc.perform(get(uri))
-                            .andDo(print());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new IllegalStateException("no print html");
-                }
-            driver.get("http://localhost" + uri);
-            WebElement webElement = driver.findElement(By.id("browse")).findElement(By.tagName("div"));
-            return webElement;
-        };
+
         ComponentProperties componentProperties = new ComponentProperties();
         ComponentProperties properties = new ComponentProperties();
-        List<Link> list = new ArrayList<>();
-        Link link1 = new Link();
-        link1.setId(1L);
-        link1.setTitle("logo1");
-        link1.setThumbUri("http://placehold.it/106x82?text=logo1");
+        List<Map<String,Object>> list = new ArrayList<>();
+        Map<String,Object> link1 = new HashedMap();
+        link1.put("linkUrl","logo1");
+        link1.put("thumbUri","http://placehold.it/106x82?text=logo1");
 
-        Link link2 = new Link();
-        link2.setId(2L);
-        link2.setTitle("logo1");
-        link2.setThumbUri("http://placehold.it/106x82?text=logo2");
+        Map<String,Object> link2 = new HashedMap();
+        link2.put("linkUrl","logo1");
+        link2.put("thumbUri","http://placehold.it/106x82?text=logo1");
 
         list.add(link1);
         list.add(link2);
-        properties.put("logoLinkList",list);
+        properties.put(WidgetInfo.VALID_LOGO_LINK_LIST,list);
         componentProperties.put("properties", properties);
 
         WebElement webElement = uiChanger.apply(componentProperties);

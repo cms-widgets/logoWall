@@ -19,9 +19,12 @@ import com.huotu.hotcms.widget.ComponentProperties;
 import com.huotu.hotcms.widget.Widget;
 import com.huotu.hotcms.widget.WidgetStyle;
 import me.jiangcai.lib.resource.service.ResourceService;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.http.entity.ContentType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -79,23 +82,20 @@ public class WidgetInfo implements Widget{
         return new WidgetStyle[]{new DefaultWidgetStyle()};
     }
 
-
-    @Override
-    public Resource widgetJs() {
-        return new ClassPathResource("js/logoWall.js", getClass().getClassLoader());
-    }
-
-
     @Override
     public Map<String, Resource> publicResources() {
         Map<String, Resource> map = new HashMap<>();
         map.put("thumbnail/defaultStyleThumbnail.png",new ClassPathResource("thumbnail/defaultStyleThumbnail.png"
                 ,getClass().getClassLoader()));
+        map.put("js/logoWall.js",new ClassPathResource("js/logoWall.js",getClass().getClassLoader()));
         return map;
     }
 
     @Override
-    public Resource widgetDependencyContent(ContentType contentType) {
+    public Resource widgetDependencyContent(MediaType mediaType) {
+        if (mediaType.isCompatibleWith(Javascript)){
+            return new ClassPathResource("js/logoWall.js",getClass().getClassLoader());
+        }
         return null;
     }
 
@@ -116,7 +116,7 @@ public class WidgetInfo implements Widget{
         }
         //加入控件独有的属性验证
 
-        List<List> logoLinkList = (List<List>) componentProperties.get(VALID_LOGO_LINK_LIST);
+        List<Map<String,Object>> logoLinkList = (List<Map<String, Object>>) componentProperties.get(VALID_LOGO_LINK_LIST);
         if (logoLinkList == null && logoLinkList.size()>0) {
             throw new IllegalArgumentException("控件属性缺少");
         }
@@ -129,33 +129,30 @@ public class WidgetInfo implements Widget{
 
     @Override
     public ComponentProperties defaultProperties(ResourceService resourceService) throws IOException {
-        List<Link> list = new ArrayList<>();
-        Link link1 = new Link();
-        link1.setId(1L);
-        link1.setTitle("logo1");
-        link1.setThumbUri("http://placehold.it/106x82?text=logo1");
+        List<Map<String,Object>> list = new ArrayList<>();
+        Map<String ,Object> link1 = new HashedMap();
 
-        Link link2 = new Link();
-        link2.setId(2L);
-        link2.setTitle("logo1");
-        link2.setThumbUri("http://placehold.it/106x82?text=logo2");
+        link1.put("linkUrl","logo1");
+        link1.put("thumbUri","http://placehold.it/106x82?text=logo1");
 
-        Link link3 = new Link();
-        link3.setId(1L);
-        link3.setTitle("logo3");
-        link3.setThumbUri("http://placehold.it/106x82?text=logo3");
+        Map<String ,Object> link2 = new HashedMap();
+        link2.put("linkUrl","logo1");
+        link2.put("thumbUri","http://placehold.it/106x82?text=logo2");
 
-        Link link4 = new Link();
-        link4.setId(4L);
-        link4.setTitle("logo4");
-        link4.setThumbUri("http://placehold.it/106x82?text=logo4");
+        Map<String ,Object> link3 = new HashedMap();
+        link3.put("linkUrl","logo3");
+        link3.put("thumbUri","http://placehold.it/106x82?text=logo3");
+
+        Map<String ,Object> link4 = new HashedMap();
+        link4.put("linkUrl","logo4");
+        link4.put("thumbUri","http://placehold.it/106x82?text=logo4");
 
         list.add(link1);
         list.add(link2);
         list.add(link3);
         list.add(link4);
         ComponentProperties properties = new ComponentProperties();
-        properties.put("logoLinkList",list);
+        properties.put(VALID_LOGO_LINK_LIST,list);
         return properties;
     }
 

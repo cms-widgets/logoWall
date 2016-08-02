@@ -9,23 +9,18 @@
 
 package com.huotu.hotcms.widget.logoWall;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
-import com.huotu.hotcms.service.entity.Link;
 import com.huotu.hotcms.widget.ComponentProperties;
 import com.huotu.hotcms.widget.Widget;
 import com.huotu.hotcms.widget.WidgetStyle;
 import me.jiangcai.lib.resource.service.ResourceService;
-import org.apache.commons.collections.map.HashedMap;
-import org.apache.http.entity.ContentType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -125,20 +120,20 @@ public class WidgetInfo implements Widget{
     @Override
     public ComponentProperties defaultProperties(ResourceService resourceService) throws IOException {
         List<Map<String,Object>> list = new ArrayList<>();
-        Map<String ,Object> link1 = new HashedMap();
+        Map<String, Object> link1 = new HashMap();
 
         link1.put("linkUrl","logo1");
         link1.put("thumbUri","http://placehold.it/106x82?text=logo1");
 
-        Map<String ,Object> link2 = new HashedMap();
+        Map<String, Object> link2 = new HashMap();
         link2.put("linkUrl","logo1");
         link2.put("thumbUri","http://placehold.it/106x82?text=logo2");
 
-        Map<String ,Object> link3 = new HashedMap();
+        Map<String, Object> link3 = new HashMap();
         link3.put("linkUrl","logo3");
         link3.put("thumbUri","http://placehold.it/106x82?text=logo3");
 
-        Map<String ,Object> link4 = new HashedMap();
+        Map<String, Object> link4 = new HashMap();
         link4.put("linkUrl","logo4");
         link4.put("thumbUri","http://placehold.it/106x82?text=logo4");
 

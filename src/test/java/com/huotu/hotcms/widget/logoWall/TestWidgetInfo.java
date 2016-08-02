@@ -13,16 +13,16 @@ import com.huotu.hotcms.widget.ComponentProperties;
 import com.huotu.hotcms.widget.Widget;
 import com.huotu.hotcms.widget.WidgetStyle;
 import com.huotu.widget.test.WidgetTest;
-import com.huotu.widget.test.bean.WidgetViewController;
-import org.apache.commons.collections.map.HashedMap;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -56,23 +56,21 @@ public class TestWidgetInfo extends WidgetTest {
     @Override
     protected void browseWork(Widget widget, WidgetStyle style, Function<ComponentProperties, WebElement> uiChanger) {
 
-        ComponentProperties componentProperties = new ComponentProperties();
         ComponentProperties properties = new ComponentProperties();
         List<Map<String,Object>> list = new ArrayList<>();
-        Map<String,Object> link1 = new HashedMap();
+        Map<String, Object> link1 = new HashMap();
         link1.put("linkUrl","logo1");
         link1.put("thumbUri","http://placehold.it/106x82?text=logo1");
 
-        Map<String,Object> link2 = new HashedMap();
+        Map<String, Object> link2 = new HashMap();
         link2.put("linkUrl","logo1");
         link2.put("thumbUri","http://placehold.it/106x82?text=logo1");
 
         list.add(link1);
         list.add(link2);
         properties.put(WidgetInfo.VALID_LOGO_LINK_LIST,list);
-        componentProperties.put("properties", properties);
 
-        WebElement webElement = uiChanger.apply(componentProperties);
+        WebElement webElement = uiChanger.apply(properties);
 
         List<WebElement> thumbnails = webElement.findElements(By.className("thumbnail"));
         assertThat(thumbnails.size()).isEqualTo(2);

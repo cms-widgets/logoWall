@@ -17,7 +17,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -43,8 +42,8 @@ public class TestWidgetInfo extends WidgetTest {
             assertThat(0).as("save没有属性值返回异常").isEqualTo(0);
         }
 
-        List<WebElement> options =  editor.findElements(By.tagName("option"));
-        assertThat(options.size()).isNotEqualTo(0);
+        List<WebElement> input = editor.findElements(By.tagName("input"));
+        assertThat(input.size()).isNotEqualTo(0);
         try{
             currentWidgetProperties.get();
         }catch (IllegalStateException ignored){
@@ -57,23 +56,16 @@ public class TestWidgetInfo extends WidgetTest {
     protected void browseWork(Widget widget, WidgetStyle style, Function<ComponentProperties, WebElement> uiChanger) {
 
         ComponentProperties properties = new ComponentProperties();
-        List<Map<String,Object>> list = new ArrayList<>();
-        Map<String, Object> link1 = new HashMap();
-        link1.put("linkUrl","logo1");
-        link1.put("thumbUri","http://placehold.it/106x82?text=logo1");
+        List<String> list = new ArrayList<>();
 
-        Map<String, Object> link2 = new HashMap();
-        link2.put("linkUrl","logo1");
-        link2.put("thumbUri","http://placehold.it/106x82?text=logo1");
-
-        list.add(link1);
-        list.add(link2);
+        list.add("http://placehold.it/106x82?text=logo1");
+        list.add("http://placehold.it/106x82?text=logo2");
         properties.put(WidgetInfo.VALID_LOGO_LINK_LIST,list);
 
         WebElement webElement = uiChanger.apply(properties);
 
-        List<WebElement> thumbnails = webElement.findElements(By.className("thumbnail"));
-        assertThat(thumbnails.size()).isEqualTo(2);
+        List<WebElement> img = webElement.findElements(By.tagName("img"));
+        assertThat(img.size()).isEqualTo(2);
 
     }
 

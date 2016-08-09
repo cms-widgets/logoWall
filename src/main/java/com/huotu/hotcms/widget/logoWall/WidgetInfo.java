@@ -106,7 +106,7 @@ public class WidgetInfo implements Widget{
         }
         //加入控件独有的属性验证
 
-        List<Map<String,Object>> logoLinkList = (List<Map<String, Object>>) componentProperties.get(VALID_LOGO_LINK_LIST);
+        List logoLinkList = (List) componentProperties.get(VALID_LOGO_LINK_LIST);
         if (logoLinkList == null && logoLinkList.size()>0) {
             throw new IllegalArgumentException("控件属性缺少");
         }
@@ -119,28 +119,11 @@ public class WidgetInfo implements Widget{
 
     @Override
     public ComponentProperties defaultProperties(ResourceService resourceService) throws IOException {
-        List<Map<String,Object>> list = new ArrayList<>();
-        Map<String, Object> link1 = new HashMap();
-
-        link1.put("linkUrl","logo1");
-        link1.put("thumbUri","http://placehold.it/106x82?text=logo1");
-
-        Map<String, Object> link2 = new HashMap();
-        link2.put("linkUrl","logo1");
-        link2.put("thumbUri","http://placehold.it/106x82?text=logo2");
-
-        Map<String, Object> link3 = new HashMap();
-        link3.put("linkUrl","logo3");
-        link3.put("thumbUri","http://placehold.it/106x82?text=logo3");
-
-        Map<String, Object> link4 = new HashMap();
-        link4.put("linkUrl","logo4");
-        link4.put("thumbUri","http://placehold.it/106x82?text=logo4");
-
-        list.add(link1);
-        list.add(link2);
-        list.add(link3);
-        list.add(link4);
+        List<String> list = new ArrayList<>();
+        list.add("http://placehold.it/106x82?text=logo4");
+        list.add("http://placehold.it/106x82?text=logo3");
+        list.add("http://placehold.it/106x82?text=logo2");
+        list.add("http://placehold.it/106x82?text=logo1");
         ComponentProperties properties = new ComponentProperties();
         properties.put(VALID_LOGO_LINK_LIST,list);
         return properties;

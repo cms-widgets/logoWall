@@ -7,7 +7,7 @@ CMSWidgets.initWidget({
     editor: {
         properties: null,
         uploadImg: function () {
-            var that = this;
+            var me = this;
             uploadForm({
                 ui: '#logoImageUploader',
                 inputName: 'file',
@@ -15,12 +15,12 @@ CMSWidgets.initWidget({
                 maxHeight: 130,
                 isCongruent: false,
                 successCallback: function (files, data, xhr, pd) {
-                    that.properties.logoLinkList.push(data.fileUri);
+                    me.properties.logoLinkList.push(data.fileUri);
                 },
                 deleteCallback: function (resp, data, jqXHR) {
                     $.grep(editor.properties.logoLinkList, function (obj, i) {
                         if (obj == data.fileUri) {
-                            that.properties.logoLinkList.splice(i, 1);
+                            me.properties.logoLinkList.splice(i, 1);
                         }
                     })
                 }
@@ -28,11 +28,11 @@ CMSWidgets.initWidget({
         },
         saveComponent: function (onSuccess, onFailed) {
             if (this.properties.logoLinkList != null) {
-                onSuccess(this.properties)
+                onSuccess(this.properties);
                 return this.properties;
             }
             onFailed("组件数据缺少,未能保存,请完善。");
-            return ;
+            return false;
         },
         initProperties: function () {
             this.properties.logoLinkList = [];
@@ -43,7 +43,7 @@ CMSWidgets.initWidget({
             this.uploadImg();
         },
         close: function (gloablId) {
-
+            $('#logoImageUploader').siblings().remove();
         }
     }
 });

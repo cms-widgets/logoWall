@@ -1,6 +1,6 @@
 <!--预览视图-->
 <div id="logoWall" class="logoWall row">
-    <div class="col-xs-4 col-md-2" th:each="logoLink:${properties['logoLinkList']}">
+    <div class="col-xs-4 col-md-2" th:each="logoLink:${logoLinkList}">
         <img class="img-responsive center-block" th:src="${logoLink}" src="http://placehold.it/174x122">
     </div>
 </div>

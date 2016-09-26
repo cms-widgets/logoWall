@@ -1,49 +1,13 @@
-
 /**
  * Created by lhx on 2016/6/27.
  */
 CMSWidgets.initWidget({
     // 编辑器相关
     editor: {
-        properties: null,
-        uploadImg: function () {
-            var me = this;
-            uploadForm({
-                ui: '#logoImageUploader',
-                inputName: 'file',
-                maxWidth: 180,
-                maxHeight: 130,
-                isCongruent: false,
-                successCallback: function (files, data, xhr, pd) {
-                    me.properties.logoLinkList.push(data.fileUri);
-                },
-                deleteCallback: function (resp, data, jqXHR) {
-                    $.grep(editor.properties.logoLinkList, function (obj, i) {
-                        if (obj == data.fileUri) {
-                            me.properties.logoLinkList.splice(i, 1);
-                        }
-                    })
-                }
-            });
-        },
-        saveComponent: function (onSuccess, onFailed) {
-            if (this.properties.logoLinkList != null) {
-                onSuccess(this.properties);
-                return this.properties;
-            }
+        saveComponent: function (onFailed) {
+            if (this.properties.linkSerial == null || this.properties.linkSerial == '')
             onFailed("组件数据缺少,未能保存,请完善。");
             return false;
-        },
-        initProperties: function () {
-            this.properties.logoLinkList = [];
-        },
-        open: function (globalId) {
-            this.properties = widgetProperties(globalId);
-            this.initProperties();
-            this.uploadImg();
-        },
-        close: function (gloablId) {
-            $('#logoImageUploader').siblings().remove();
         }
     }
 });

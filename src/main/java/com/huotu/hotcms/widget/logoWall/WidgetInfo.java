@@ -9,31 +9,41 @@
 
 package com.huotu.hotcms.widget.logoWall;
 
+import com.huotu.hotcms.service.common.ContentType;
+import com.huotu.hotcms.service.entity.Category;
+import com.huotu.hotcms.service.entity.Link;
+import com.huotu.hotcms.service.model.LinkModel;
+import com.huotu.hotcms.service.repository.CategoryRepository;
+import com.huotu.hotcms.service.service.CategoryService;
+import com.huotu.hotcms.service.service.ContentService;
+import com.huotu.hotcms.service.service.LinkService;
+import com.huotu.hotcms.widget.CMSContext;
 import com.huotu.hotcms.widget.ComponentProperties;
+import com.huotu.hotcms.widget.PreProcessWidget;
 import com.huotu.hotcms.widget.Widget;
 import com.huotu.hotcms.widget.WidgetStyle;
+import com.huotu.hotcms.widget.service.CMSDataSourceService;
 import me.jiangcai.lib.resource.service.ResourceService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 
 /**
  * @author CJ
  */
-public class WidgetInfo implements Widget{
-    public static final String VALID_LOGO_LINK_LIST = "logoLinkList";
-    /*
-     * 指定风格的模板类型 如：html,text等
-     */
-    public static final String VALID_STYLE_TEMPLATE = "styleTemplate";
+public class WidgetInfo implements Widget, PreProcessWidget {
+    public static final String LINK_SERIAL = "linkSerial";
+    private static final String VALID_DATA_LIST = "dataList";
 
     @Override
     public String groupId() {
@@ -48,7 +58,7 @@ public class WidgetInfo implements Widget{
 
     @Override
     public String name(Locale locale) {
-        if (locale.equals(Locale.CHINESE)) {
+        if (locale.equals(Locale.CHINA)) {
             return "LOGO墙";
         }
         return "logoWall";
@@ -56,7 +66,7 @@ public class WidgetInfo implements Widget{
 
     @Override
     public String description(Locale locale) {
-        if (locale.equals(Locale.CHINESE)) {
+        if (locale.equals(Locale.CHINA)) {
             return "这是一个logo墙控件，你可以对组件进行自定义修改。";
         }
         return "This is a logoWall,  you can make custom change the component.";
@@ -93,10 +103,9 @@ public class WidgetInfo implements Widget{
     public void valid(String styleId, ComponentProperties componentProperties) throws IllegalArgumentException {
         WidgetStyle style = WidgetStyle.styleByID(this, styleId);
         //加入控件独有的属性验证
-
-        List logoLinkList = (List) componentProperties.get(VALID_LOGO_LINK_LIST);
-        if (logoLinkList == null && logoLinkList.size()>0) {
-            throw new IllegalArgumentException("控件属性缺少");
+        String linkSerial = (String) componentProperties.get(LINK_SERIAL);
+        if (linkSerial == null || linkSerial.equals("")) {
+            throw new IllegalArgumentException("控件属性缺少数据源");
         }
     }
 
@@ -107,15 +116,87 @@ public class WidgetInfo implements Widget{
 
     @Override
     public ComponentProperties defaultProperties(ResourceService resourceService) throws IOException {
-        List<String> list = new ArrayList<>();
-        list.add("http://placehold.it/106x82?text=logo4");
-        list.add("http://placehold.it/106x82?text=logo3");
-        list.add("http://placehold.it/106x82?text=logo2");
-        list.add("http://placehold.it/106x82?text=logo1");
         ComponentProperties properties = new ComponentProperties();
-        properties.put(VALID_LOGO_LINK_LIST,list);
+        CMSDataSourceService cmsDataSourceService = CMSContext.RequestContext().getWebApplicationContext()
+                .getBean(CMSDataSourceService.class);
+        List<Category> list = cmsDataSourceService.findLinkCategory();
+        if (list.isEmpty()) {
+            Category category = initCategory();
+            initLink(category, resourceService);
+            properties.put(LINK_SERIAL, category.getSerial());
+        } else {
+            properties.put(LINK_SERIAL, list.get(0).getSerial());
+        }
         return properties;
     }
+
+    @Override
+    public void prepareContext(WidgetStyle style, ComponentProperties properties, Map<String, Object> variables
+            , Map<String, String> parameters) {
+        String serial = (String) properties.get(LINK_SERIAL);
+        CMSDataSourceService cmsDataSourceService = CMSContext.RequestContext().getWebApplicationContext()
+                .getBean(CMSDataSourceService.class);
+        List<LinkModel> linkModels = cmsDataSourceService.findLinkContent(serial);
+        variables.put(VALID_DATA_LIST, linkModels);
+    }
+
+    /**
+     * 从CMSContext中获取CMSService的实现
+     *
+     * @param cmsService 需要返回的service接口
+     * @param <T>        返回的service实现
+     * @return
+     */
+    private <T> T getCMSServiceFromCMSContext(Class<T> cmsService) {
+        return CMSContext.RequestContext().
+                getWebApplicationContext().getBean(cmsService);
+    }
+
+    /**
+     * 初始化数据源
+     *
+     * @return
+     */
+    private Category initCategory() {
+        CategoryService categoryService = getCMSServiceFromCMSContext(CategoryService.class);
+        CategoryRepository categoryRepository = getCMSServiceFromCMSContext(CategoryRepository.class);
+        Category category = new Category();
+        category.setContentType(ContentType.Link);
+        category.setName("链接数据源");
+        categoryService.init(category);
+        category.setSite(CMSContext.RequestContext().getSite());
+        //保存到数据库
+        categoryRepository.save(category);
+        return category;
+    }
+
+    /**
+     * /**
+     * 初始化一个图片
+     *
+     * @param category
+     * @param resourceService
+     * @return
+     */
+    private Link initLink(Category category, ResourceService resourceService) throws IOException {
+        ContentService contentService = getCMSServiceFromCMSContext(ContentService.class);
+        LinkService linkService = getCMSServiceFromCMSContext(LinkService.class);
+        Link link = new Link();
+        link.setTitle("link");
+        link.setCategory(category);
+        link.setDeleted(false);
+        link.setCreateTime(LocalDateTime.now());
+        link.setLinkUrl("http://www.huobanplus.com/");
+        ClassPathResource classPathResource = new ClassPathResource("img/logo.png", getClass().getClassLoader());
+        InputStream inputStream = classPathResource.getInputStream();
+        String imgPath = "_resources/" + UUID.randomUUID().toString() + ".png";
+        resourceService.uploadResource(imgPath, inputStream);
+        link.setThumbUri(imgPath);
+        contentService.init(link);
+        linkService.saveLink(link);
+        return link;
+    }
+
 
 
 

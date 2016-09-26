@@ -32,7 +32,7 @@ public class DefaultWidgetStyle implements WidgetStyle{
 
     @Override
     public String name(Locale locale) {
-        if (locale.equals(Locale.CHINESE)) {
+        if (locale.equals(Locale.CHINA)) {
             return name();
         }
         return "bootstrap style logoWall";
@@ -45,7 +45,7 @@ public class DefaultWidgetStyle implements WidgetStyle{
 
     @Override
     public String description(Locale locale) {
-        if (locale.equals(Locale.CHINESE)) {
+        if (locale.equals(Locale.CHINA)) {
             return description();
         }
         return "Based on the bootstrap style by logoWall";

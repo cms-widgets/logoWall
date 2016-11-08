@@ -12,16 +12,14 @@ package com.huotu.hotcms.widget.logoWall;
 import com.huotu.hotcms.service.common.ContentType;
 import com.huotu.hotcms.service.entity.Category;
 import com.huotu.hotcms.service.entity.Link;
-import com.huotu.hotcms.service.model.LinkModel;
 import com.huotu.hotcms.service.repository.CategoryRepository;
+import com.huotu.hotcms.service.repository.LinkRepository;
 import com.huotu.hotcms.service.service.CategoryService;
 import com.huotu.hotcms.service.service.ContentService;
 import com.huotu.hotcms.service.service.LinkService;
-import com.huotu.hotcms.widget.CMSContext;
-import com.huotu.hotcms.widget.ComponentProperties;
-import com.huotu.hotcms.widget.PreProcessWidget;
-import com.huotu.hotcms.widget.Widget;
-import com.huotu.hotcms.widget.WidgetStyle;
+import com.huotu.hotcms.widget.*;
+import com.huotu.hotcms.widget.entity.PageInfo;
+import com.huotu.hotcms.widget.repository.PageInfoRepository;
 import com.huotu.hotcms.widget.service.CMSDataSourceService;
 import me.jiangcai.lib.resource.service.ResourceService;
 import org.springframework.core.io.ClassPathResource;
@@ -31,11 +29,7 @@ import org.springframework.http.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 
 /**
@@ -74,7 +68,7 @@ public class WidgetInfo implements Widget, PreProcessWidget {
 
     @Override
     public String dependVersion() {
-        return "1.0-SNAPSHOT";
+        return "1.1.0";
     }
 
     @Override
@@ -85,16 +79,16 @@ public class WidgetInfo implements Widget, PreProcessWidget {
     @Override
     public Map<String, Resource> publicResources() {
         Map<String, Resource> map = new HashMap<>();
-        map.put("thumbnail/defaultStyleThumbnail.png",new ClassPathResource("thumbnail/defaultStyleThumbnail.png"
-                ,getClass().getClassLoader()));
-        map.put("js/logoWall.js",new ClassPathResource("js/logoWall.js",getClass().getClassLoader()));
+        map.put("thumbnail/defaultStyleThumbnail.png", new ClassPathResource("thumbnail/defaultStyleThumbnail.png"
+                , getClass().getClassLoader()));
+        map.put("js/logoWall.js", new ClassPathResource("js/logoWall.js", getClass().getClassLoader()));
         return map;
     }
 
     @Override
     public Resource widgetDependencyContent(MediaType mediaType) {
-        if (mediaType.isCompatibleWith(Javascript)){
-            return new ClassPathResource("js/logoWall.js",getClass().getClassLoader());
+        if (mediaType.isCompatibleWith(Javascript)) {
+            return new ClassPathResource("js/logoWall.js", getClass().getClassLoader());
         }
         return null;
     }
@@ -134,23 +128,18 @@ public class WidgetInfo implements Widget, PreProcessWidget {
     public void prepareContext(WidgetStyle style, ComponentProperties properties, Map<String, Object> variables
             , Map<String, String> parameters) {
         String serial = (String) properties.get(LINK_SERIAL);
-        CMSDataSourceService cmsDataSourceService = CMSContext.RequestContext().getWebApplicationContext()
-                .getBean(CMSDataSourceService.class);
-        List<LinkModel> linkModels = cmsDataSourceService.findLinkContent(serial);
-        variables.put(VALID_DATA_LIST, linkModels);
+        LinkRepository linkRepository = getCMSServiceFromCMSContext(LinkRepository.class);
+        PageInfoRepository pageInfoRepository = getCMSServiceFromCMSContext(PageInfoRepository.class);
+        List<Link> links = linkRepository.findByCategory_SiteAndCategory_Serial(CMSContext.RequestContext().getSite(), serial);
+        for (Link link : links) {
+            if (link.getLinkType().isPage()) {
+                PageInfo pageInfo = pageInfoRepository.findOne(link.getPageInfoID());
+                link.setPagePath(pageInfo.getPagePath());
+            }
+        }
+        variables.put(VALID_DATA_LIST, links);
     }
 
-    /**
-     * 从CMSContext中获取CMSService的实现
-     *
-     * @param cmsService 需要返回的service接口
-     * @param <T>        返回的service实现
-     * @return
-     */
-    private <T> T getCMSServiceFromCMSContext(Class<T> cmsService) {
-        return CMSContext.RequestContext().
-                getWebApplicationContext().getBean(cmsService);
-    }
 
     /**
      * 初始化数据源
@@ -196,8 +185,6 @@ public class WidgetInfo implements Widget, PreProcessWidget {
         linkService.saveLink(link);
         return link;
     }
-
-
 
 
 }

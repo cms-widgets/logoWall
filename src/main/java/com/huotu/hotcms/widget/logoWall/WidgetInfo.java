@@ -10,17 +10,16 @@
 package com.huotu.hotcms.widget.logoWall;
 
 import com.huotu.hotcms.service.common.ContentType;
+import com.huotu.hotcms.service.common.LinkType;
 import com.huotu.hotcms.service.entity.Category;
 import com.huotu.hotcms.service.entity.Link;
 import com.huotu.hotcms.service.repository.CategoryRepository;
 import com.huotu.hotcms.service.repository.LinkRepository;
 import com.huotu.hotcms.service.service.CategoryService;
 import com.huotu.hotcms.service.service.ContentService;
-import com.huotu.hotcms.service.service.LinkService;
 import com.huotu.hotcms.widget.*;
 import com.huotu.hotcms.widget.entity.PageInfo;
 import com.huotu.hotcms.widget.repository.PageInfoRepository;
-import com.huotu.hotcms.widget.service.CMSDataSourceService;
 import me.jiangcai.lib.resource.service.ResourceService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -111,9 +110,10 @@ public class WidgetInfo implements Widget, PreProcessWidget {
     @Override
     public ComponentProperties defaultProperties(ResourceService resourceService) throws IOException {
         ComponentProperties properties = new ComponentProperties();
-        CMSDataSourceService cmsDataSourceService = CMSContext.RequestContext().getWebApplicationContext()
-                .getBean(CMSDataSourceService.class);
-        List<Category> list = cmsDataSourceService.findLinkCategory();
+        CategoryRepository categoryRepository = getCMSServiceFromCMSContext(CategoryRepository.class);
+        //todo 获取列表要过滤掉已删除的数据源
+        List<Category> list =
+                categoryRepository.findBySiteAndContentTypeAndDeletedFalse(CMSContext.RequestContext().getSite(), ContentType.Link);
         if (list.isEmpty()) {
             Category category = initCategory();
             initLink(category, resourceService);
@@ -163,17 +163,20 @@ public class WidgetInfo implements Widget, PreProcessWidget {
      * /**
      * 初始化一个图片
      *
+     *
+     *
      * @param category
      * @param resourceService
      * @return
      */
     private Link initLink(Category category, ResourceService resourceService) throws IOException {
         ContentService contentService = getCMSServiceFromCMSContext(ContentService.class);
-        LinkService linkService = getCMSServiceFromCMSContext(LinkService.class);
+        LinkRepository linkRepository = getCMSServiceFromCMSContext(LinkRepository.class);
         Link link = new Link();
         link.setTitle("link");
         link.setCategory(category);
         link.setDeleted(false);
+        link.setLinkType(LinkType.Link);
         link.setCreateTime(LocalDateTime.now());
         link.setLinkUrl("http://www.huobanplus.com/");
         ClassPathResource classPathResource = new ClassPathResource("img/logo.png", getClass().getClassLoader());
@@ -182,8 +185,7 @@ public class WidgetInfo implements Widget, PreProcessWidget {
         resourceService.uploadResource(imgPath, inputStream);
         link.setThumbUri(imgPath);
         contentService.init(link);
-        linkService.saveLink(link);
-        return link;
+        return linkRepository.saveAndFlush(link);
     }
 
 

@@ -4,8 +4,7 @@
         <a href="javascript:void(0)" th:if="${item.linkType.isPage()}" data-page="true" th:href="@{/${item.pagePath}}">
             <img class="img-responsive center-block" res:src="${item.thumbUri}" src="http://placehold.it/174x122">
         </a>
-        <a href="javascript:void(0)" th:if="${!item.linkType.isPage()}" data-page="false" th:href="${item.linkUrl}"
-           th:text="${link.title}">
+        <a href="javascript:void(0)" th:if="${!item.linkType.isPage()}" data-page="false" th:href="${item.linkUrl}">
             <img class="img-responsive center-block" res:src="${item.thumbUri}" src="http://placehold.it/174x122">
         </a>
     </div>
